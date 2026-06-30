@@ -167,6 +167,31 @@ var isLongName: (String) -> Bool = { name in
 }
 print(isLongName("String"))
 
+var gradeToLetter: (Int) -> String = { grade in
+    switch grade{
+    case 91...100:
+        return "A"
+    case 76...90:
+        return "B"
+    case 50...75:
+        return "C"
+    default:
+        return "F"
+    }
+}
+
+print(gradeToLetter(99))
+
+let evenAgeStudents = students.filter{ isEven($0.age)}
+let LongNameStudents = students.filter { isLongName($0.name)}
+let gradesToLetters = students.map{
+    "\($0.name): \(gradeToLetter($0.grade))"
+}
+
+print(evenAgeStudents)
+print(LongNameStudents)
+print(gradesToLetters)
+
 //In a single chain on the students array:
 //
 //Filter students who passed (grade above 50)
@@ -174,17 +199,10 @@ print(isLongName("String"))
 //Map to a formatted string: "1. Rahul — 91", "2. Meera — 88" etc. (with ranking)
 //Print each one using forEach
 
-let chaining = students.filter { $0.grade > 50 }.sorted{ $0.grade > $1.grade}
-print(chaining)
 
-let mapping: [()] = students.map{ student in
-    print("\(student.name) — \(student.grade)")
-}
-
-let ranked: [()] = chaining.enumerated().map{ (index, student) in
+print(students.filter { $0.grade > 50 }.sorted{ $0.grade > $1.grade}.enumerated().forEach { index, student in
     print("\(index + 1). \(student.name) — \(student.grade)")
-}
-ranked.forEach { print($0)}
+})
 
 
 //Problem 4 — makeCounter with a twist
@@ -194,9 +212,10 @@ ranked.forEach { print($0)}
 //Returns a closure that increments by that step each time
 
 func makeCounter(step: Int) -> () -> Int {
-    var value:Int = 0
+    var value = 0
     let incrementedValue = {
-        step + value
+        value = step + value
+        return value
     }
     return incrementedValue
 }
@@ -204,5 +223,19 @@ func makeCounter(step: Int) -> () -> Int {
 let countByTwo = makeCounter(step: 2)
 print(countByTwo())
 print(countByTwo())
+let countByFive = makeCounter(step: 5)
+print(countByFive())
+print(countByFive())
 
 
+// Q: What is the difference between a regular closure and an @escaping closure?
+// Q: Why does the following code need @escaping?
+
+func fetchData(completion: @escaping () -> Void) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        completion()
+    }
+}
+
+// Your answer:
+// Regular closures are by default non escaping. When the closure outlives the function it is basically not getting executed at the time of the function call, which is escaping. hence we need to mark it escaping.
